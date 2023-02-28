@@ -1,21 +1,29 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, FlatList, Image, TouchableOpacity} from 'react-native';
 import {Tab, TabView} from '@rneui/themed';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation,useRoute } from '@react-navigation/native';
+import {ChatMessageScreen} from '../providers/individualChatProvider'
+
+import {userActionListener} from '../providers/listenerProvider'
+import useStates from '../providers/stateProvider';
 
 let ActiveChats = chats => {
   const navigation = useNavigation();
   setTimeout(() => {
-    console.log('Active chat tab-->', JSON.stringify(chats.value));
+    console.log('Active chat tab-->', JSON.stringify({chats:chats.value}));
   }, 3000);
 
   const [dataItem, setDataItem] = useState(chats.value);
-  useEffect(() => {}, [dataItem]);
+  useEffect(() => {
+    // setDataItem(chats.value);
+  navigation.setParams({'chats':chats.value});
+  }, [dataItem]);
 
   let renderItem = ({item}) => (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate('IndividualChat', {item});
+         navigation.navigate('ChatMessageScreen', {item});
+        // <ChatMessageScreen value={item} />
       }}>
       <View style={styles.item}>
         <Image source={{uri: item.customerIconUrl}} style={styles.avatar} />
@@ -163,6 +171,7 @@ let ChatListPage = (chats, setChats, globalData) => {
   console.log('ChatScreen', chats);
   console.log('ChatScreen-->globaldata', globalData);
   console.log('ChatList page-->');
+  
   const [mounted, setMounted] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
 

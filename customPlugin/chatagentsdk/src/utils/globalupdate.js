@@ -11,8 +11,17 @@ import {SafeAreaView, ActivityIndicator, Text, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import MyContext from '../components/globalcontext';
+import {userActionListener} from '../providers/listenerProvider'
 export const GlobalContext = createContext();
 const Stack = createStackNavigator();
+import useStates  from '../providers/stateProvider';
+const states = useStates();
+
+
+// export const someActionListener = (e, states) => {
+//   // This should be done
+//   states.setMyState(!states.myState);
+// }
 
 export const ChatScreen = ({route}) => {
   const [globalData, setGlobalData] = useState("Hi testing");
@@ -92,6 +101,9 @@ export const ChatScreen = ({route}) => {
             console.log("new messages-->",JSON.stringify(newMessages));
             console.log("finalarray",[...oldMessages,...messages] );
            setChats(oldChats);
+          //  states.setUsers(oldChats);
+          userActionListener(oldChats);
+           console.log("from state -->",states.users);
           //  setNewMessages()
            console.log("after appending messages",JSON.stringify(chats));
           }});
@@ -139,14 +151,14 @@ export const ChatScreen = ({route}) => {
         <GlobalContext.Provider value={{chats, setChats,globalData}}>
         <ChatListPage value={{chats, setChats,globalData}} /> 
         
-         {/* <NavigationContainer independent={true} >
-        <Stack.Navigator >  */}
+        {/* <NavigationContainer independent={true} >
+        <Stack.Navigator > */}
           {/* <ChatListPage value={chats} />  */}
           {/* <Stack.Screen
               name="ChatListPage"
               component={ChatListPage}
               options={{headerShown: false}}
-              initialParams={{chats,setChats,globalData}}
+              initialParams={{chats}}
             />
           <Stack.Screen
               name="IndividualChat"
@@ -154,8 +166,8 @@ export const ChatScreen = ({route}) => {
               options={{headerShown: false}}
             /> */}
            {/* <IndividualChat value={chats} /> */}
-            {/* </Stack.Navigator>
-           </NavigationContainer>  */}
+           {/* </Stack.Navigator>
+           </NavigationContainer> */}
         </GlobalContext.Provider>
 
       </SafeAreaView>

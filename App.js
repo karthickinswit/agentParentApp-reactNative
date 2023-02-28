@@ -21,7 +21,7 @@ import {
 import Variables from 'chatagentsdk/src/utils/variables';
 
 import {ChatScreen} from 'chatagentsdk/src/utils/globalupdate';
-import IndividualChat from 'chatagentsdk/src/screens/IndividualChat';
+import {ChatMessageScreen} from 'chatagentsdk/src/providers/individualChatProvider';
 import ChatListPage from 'chatagentsdk/src/screens/ChatScreen';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -41,7 +41,8 @@ export default function ChatParent() {
           component={ChatScreen}
           options={{headerShown: false}}
         />
-        <Stack.Screen name="IndividualChat" component={IndividualChat} options={{headerShown: false}}/>
+        <Stack.Screen name="ChatMessageScreen" component={ChatMessageScreen} options={{headerShown: false}}/>
+        
       </Stack.Navigator>
     </NavigationContainer>
   );
