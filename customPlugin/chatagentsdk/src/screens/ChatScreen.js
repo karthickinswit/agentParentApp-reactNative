@@ -2,27 +2,28 @@ import React, {useEffect, useState} from 'react';
 import {View, Text, FlatList, Image, TouchableOpacity} from 'react-native';
 import {Tab, TabView} from '@rneui/themed';
 import {useNavigation,useRoute } from '@react-navigation/native';
-import {ChatMessageScreen} from '../providers/individualChatProvider'
+import {ChatMessageScreen} from '../providers/individualChatProvider';
+import IndividualChat from './IndividualChat';
 
 import {userActionListener} from '../providers/listenerProvider'
 import useStates from '../providers/stateProvider';
 
 let ActiveChats = chats => {
   const navigation = useNavigation();
-  setTimeout(() => {
-    console.log('Active chat tab-->', JSON.stringify({chats:chats.value}));
-  }, 3000);
+  // setTimeout(() => {
+  //   console.log('Active chat tab-->', JSON.stringify({chats:chats.value}));
+  // }, 3000);
 
   const [dataItem, setDataItem] = useState(chats.value);
   useEffect(() => {
     // setDataItem(chats.value);
-  navigation.setParams({'chats':chats.value});
+  // navigation.setParams({'chats':chats.value});
   }, [dataItem]);
 
   let renderItem = ({item}) => (
     <TouchableOpacity
       onPress={() => {
-         navigation.navigate('ChatMessageScreen', {item});
+         navigation.navigate('IndividualChat', {chatId:item.chatId});
         // <ChatMessageScreen value={item} />
       }}>
       <View style={styles.item}>
@@ -49,10 +50,10 @@ let ActiveChats = chats => {
     return (
       <FlatList
         legacyImplementation={true}
-        data={dataItem}
+        data={chats.value}
         keyExtractor={item => item.chatId.toString()}
         renderItem={renderItem}
-        extraData={chats.value.messages}
+        extraData={chats.value}
       />
     );
   } else {
@@ -168,8 +169,8 @@ let Tabs = chats => {
 };
 
 let ChatListPage = (chats, setChats, globalData) => {
-  console.log('ChatScreen', chats);
-  console.log('ChatScreen-->globaldata', globalData);
+  console.log('ChatScreen', chats.route.params.chats);
+  console.log('ChatScreen-->globaldata', chats.route.params.globalData);
   console.log('ChatList page-->');
   
   const [mounted, setMounted] = useState(true);
@@ -182,8 +183,8 @@ let ChatListPage = (chats, setChats, globalData) => {
   if (isLoaded) {
     return (
       <>
-        <ChatHeader value={chats.value} />
-        <Tabs value={chats.value} />
+        <ChatHeader value={chats.route.params} />
+        <Tabs value={chats.route.params} />
       </>
     );
   } else {

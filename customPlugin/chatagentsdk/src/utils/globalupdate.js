@@ -7,6 +7,7 @@ import {activeChats} from '../services/api';
 import websocket from '../../src/services/websocket';
 import subUser from '../../src/services/websocket'
 import IndividualChat from '../screens/IndividualChat';
+import {ChatMessageScreen} from '../providers/individualChatProvider';
 import {SafeAreaView, ActivityIndicator, Text, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -27,6 +28,7 @@ export const ChatScreen = ({route}) => {
   const [globalData, setGlobalData] = useState("Hi testing");
   const [agents, setAgents] = useState([]);
   const [chats, setChats] = useState();
+  const[chatId,setChatId]=useState('');
   const[users,SetUsers]=useState();
   const[newMessages,setNewMessages]=useState();
   let  socketListener=null;
@@ -102,7 +104,7 @@ export const ChatScreen = ({route}) => {
             console.log("finalarray",[...oldMessages,...messages] );
            setChats(oldChats);
           //  states.setUsers(oldChats);
-          userActionListener(oldChats);
+          // userActionListener(oldChats);
            console.log("from state -->",states.users);
           //  setNewMessages()
            console.log("after appending messages",JSON.stringify(chats));
@@ -149,25 +151,26 @@ export const ChatScreen = ({route}) => {
           backgroundColor: '#FFFFFF',
         }}>
         <GlobalContext.Provider value={{chats, setChats,globalData}}>
-        <ChatListPage value={{chats, setChats,globalData}} /> 
+        {/* <ChatListPage value={{chats, setChats,globalData}} />  */}
         
-        {/* <NavigationContainer independent={true} >
-        <Stack.Navigator > */}
+        <NavigationContainer independent={true} >
+        <Stack.Navigator >
           {/* <ChatListPage value={chats} />  */}
-          {/* <Stack.Screen
+          <Stack.Screen
               name="ChatListPage"
               component={ChatListPage}
               options={{headerShown: false}}
-              initialParams={{chats}}
+              initialParams={{chats, setChats,globalData}}
             />
           <Stack.Screen
               name="IndividualChat"
               component={IndividualChat}
               options={{headerShown: false}}
-            /> */}
+              initialParams={{chats, chatId,globalData}}
+            />
            {/* <IndividualChat value={chats} /> */}
-           {/* </Stack.Navigator>
-           </NavigationContainer> */}
+           </Stack.Navigator>
+           </NavigationContainer>
         </GlobalContext.Provider>
 
       </SafeAreaView>

@@ -41,7 +41,7 @@ export default function ChatParent() {
           component={ChatScreen}
           options={{headerShown: false}}
         />
-        <Stack.Screen name="ChatMessageScreen" component={ChatMessageScreen} options={{headerShown: false}}/>
+        {/* <Stack.Screen name="ChatMessageScreen" component={ChatMessageScreen} options={{headerShown: false}}/> */}
         
       </Stack.Navigator>
     </NavigationContainer>

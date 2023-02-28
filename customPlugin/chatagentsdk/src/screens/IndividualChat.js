@@ -18,23 +18,21 @@ import Variables from '../utils/variables';
 function IndividualChat(route) {
   //  const {chats, setChats} = useContext(GlobalContext);
 
-  console.log('Chat using context', JSON.stringify(chats));
-  console.log('In individual chatparams-->',route.value.chatId);
-   const [chats, setMyChats] = React.useState(route.value);
+  console.log('Chat using context', JSON.stringify(route.route));
+  let oriRoute=route.route
+  console.log('In individual chatparams-->',oriRoute.params.chatId);
+   const [chats, setMyChats] = React.useState(oriRoute.params.chats);
   // let chats = route.value;
-  let chatId = route.value.chatId;
-  let chatIndex = chats.messages.map((response,index) => {
-    console.log('REponse', response.chatId, ' ', chatId);
-    if(response.chatId == chatId) return  index ;
-  });
+  let chatId = oriRoute.params.chatId;
+  let chatIndex = oriRoute.params.chats.map((response,index)=>{if(response.chatId==oriRoute.params.chatId) return index;});
   console.log('Item variable index', chatIndex);
   // let messagehistory = chats[index].messages.map(res => res);
 
   // console.log('messagehistory', messagehistory);
 
-  // React.useEffect(() => {
-  //   ChatBody();
-  // }, [chats]);
+  React.useEffect(() => {
+    ChatBody();
+  }, [chats]);
 
   let ChatHeader = () => {
     const navigation = useNavigation();
@@ -54,15 +52,15 @@ function IndividualChat(route) {
           </TouchableOpacity>
           <View style={styles.leftContainer}>
             <Image
-              source={{uri: chats.customerIconUrl}}
+              source={{uri: chats[chatIndex].customerIconUrl}}
               style={styles.avatar}
             />
             <View style={styles.textContainer}>
-              <Text style={styles.title}>{chats.customerName}</Text>
+              <Text style={styles.title}>{chats[chatIndex].customerName}</Text>
               <Text style={styles.subtitle}>
                 {
-                  chats.messages[
-                    chats.messages.length - 1
+                  chats[chatIndex].messages[
+                    chats[chatIndex].messages.length - 1
                   ].message
                 }
               </Text>
@@ -93,12 +91,12 @@ function IndividualChat(route) {
 
     return (
       <FlatList
-        data={chats.messages}
+        data={chats[chatIndex].messages}
         renderItem={renderMessage}
         keyExtractor={item => item.actionId.toString()}
         contentContainerStyle={styles.contentContainer}
         legacyImplementation={true}
-        extraData={chats.messages}
+        extraData={chats[chatIndex].messages}
       />
     );
   };

@@ -20,11 +20,11 @@ export const ChatMessageScreen = (route) => {
  
   const [globalData, setGlobalData] = useState("Hi testing");
   const [agents, setAgents] = useState([]);
-  const {chats, setChats} = useContext(MyContext);
+  //  const {chats, setChats} = useContext(MyContext);
 
   const route1=useRoute();
-  console.log("Route1",JSON.stringify(chats));
-  let[chat,setChat]=useState(route1.params.item);
+  console.log("Route1",JSON.stringify(route1));
+  // let[chat,setChat]=useState(route1.params.item);
   console.log(chat);
 //   const [chat, setChat] = useState(chat);
   const[users,SetUsers]=useState();
