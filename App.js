@@ -26,16 +26,18 @@ import ChatListPage from 'chatagentsdk/src/screens/ChatScreen';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {FAB} from 'react-native-elements';
+import { LogBox } from 'react-native';
 
 export default function ChatParent() {
   const Stack = createStackNavigator();
+  LogBox.ignoreAllLogs();
   return (
     // <ChatApp />
 
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="LoginScreen" component={LoginScreen} />
-        <Stack.Screen name="BlankPage" component={BlankPage} />
+        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown: false}} />
+        <Stack.Screen name="BlankPage" component={BlankPage} options={{headerShown: false}}/>
         <Stack.Screen
           name="ChatScreen"
           component={ChatScreen}
@@ -47,33 +49,33 @@ export default function ChatParent() {
     </NavigationContainer>
   );
 }
-const LoginScreen = () => {
+ LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [emailerror, setemailerror] = useState('');
-  const [passowrderror, setpassworderror] = useState('');
+  // const [emailerror, setemailerror] = useState('');
+  // const [passowrderror, setpassworderror] = useState('');
   const navigation = useNavigation();
   // onClickListener = viewId => {
   //   // Alert.alert('Alert', 'Button pressed ' + viewId);
   // };
 
-  const handleForgotPassword = () => {
+  const HandleForgotPassword = () => {
     // forgot password function here
   };
-  const validateEmail = username => {
+  const ValidateEmail = username => {
     const regex =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return regex.test(username.toLowerCase());
   };
 
-  const handleLogin = async () => {
-    if ((!validateEmail(username) && password.length < 8) || username == '') {
-      setemailerror('Please Provide a Valid Email Address');
-      setpassworderror('Password Should not be Empty');
+  const HandleLogin = async () => {
+    if ((!ValidateEmail(username) && password.length < 8) || username == '') {
+      // setemailerror('Please Provide a Valid Email Address');
+      // setpassworderror('Password Should not be Empty');
     } else if (password.length < 8) {
-      setpassworderror('Password Should not be Empty');
+      // setpassworderror('Password Should not be Empty');
     } else {
-      let res = await loginApi();
+      let res = await LoginApi();
       console.log('res', res);
       if (res.status) {
         Alert.alert('Attempt Successful');
@@ -93,7 +95,7 @@ const LoginScreen = () => {
       }
     }
   };
-  async function loginApi() {
+  async function LoginApi() {
     let payload = {};
     payload.email = username;
     payload.password = password;
@@ -101,7 +103,7 @@ const LoginScreen = () => {
     payload.routePath = '';
     payload.appId = 'MOC';
 
-    const loginUri = await fetch(
+    const LoginUri = await fetch(
       `https://qa.twixor.digital/moc/account/enterprise/login/twoFactorAuth?email=${encodeURIComponent(
         payload.email,
       )}&&password=${encodeURIComponent(
@@ -116,9 +118,9 @@ const LoginScreen = () => {
         // body:formdata,//'email=mailkarthi001%40gmail.com&password=karthi5596&removeExistingSession=false&routePath=&appId=MOC'
       },
     );
-    const loginResponse = await loginUri.json();
+    const LoginResponse = await LoginUri.json();
 
-    return loginResponse;
+    return LoginResponse;
   }
   return (
     <View style={styles.container}>
@@ -138,12 +140,12 @@ const LoginScreen = () => {
         value={password}
       />
       {/* {passowrderror && <p>{passowrderror}</p>} */}
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity style={styles.button} onPress={HandleLogin}>
         <Text style={styles.buttonText}> Login </Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.forgotPassword}
-        onPress={handleForgotPassword}>
+        onPress={HandleForgotPassword}>
         <Text style={styles.forgotPasswordText}> Forgot Password? </Text>
       </TouchableOpacity>
     </View>
@@ -161,7 +163,7 @@ const BlankPage = ({route}) => {
 
 
 
-  const handleClick = async () => {
+  const HandleClick = async () => {
     Variables.API_URL = propDetails.baseUrl;
     Variables.TOKEN = propDetails.token;
     console.log('Button Clicked');
@@ -180,7 +182,7 @@ const BlankPage = ({route}) => {
         <FAB
           title="start Messaging"
           style={styles.floatinBtn}
-          onPress={handleClick}
+          onPress={HandleClick}
         />
       </View>
     </>

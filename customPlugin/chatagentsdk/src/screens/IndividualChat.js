@@ -12,19 +12,20 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Variables from '../utils/variables';
-
-
-
-function IndividualChat(route) {
+import {messageService} from '../services/websocket';
+let IndividualChat = route => {
+  let flatList = React.useRef(null);
   //  const {chats, setChats} = useContext(GlobalContext);
 
-  console.log('Chat using context', JSON.stringify(route.route));
-  let oriRoute=route.route
-  console.log('In individual chatparams-->',oriRoute.params.chatId);
-   const [chats, setMyChats] = React.useState(oriRoute.params.chats);
+  console.log('Chat using context', JSON.stringify(route));
+  let oriRoute = route.route;
+  console.log('In individual chatparams-->', oriRoute.params.chatId);
+  const [chats, setMyChats] = React.useState(route.extraData);
   // let chats = route.value;
   let chatId = oriRoute.params.chatId;
-  let chatIndex = oriRoute.params.chats.map((response,index)=>{if(response.chatId==oriRoute.params.chatId) return index;});
+  let chatIndex = route.extraData.map((response, index) => {
+    if (response.chatId == oriRoute.params.chatId) return index;
+  });
   console.log('Item variable index', chatIndex);
   // let messagehistory = chats[index].messages.map(res => res);
 
@@ -46,8 +47,10 @@ function IndividualChat(route) {
               navigation.navigate('ChatListPage');
             }}>
             <Image
-              source={require('../../assets/twixor_hd_icon.png')}
-              style={styles.logo}
+              source={require('../../assets/chevron-left-solid.png')}
+              style={{   width: 30,
+    height: 30,
+  borderRadius:30}}
             />
           </TouchableOpacity>
           <View style={styles.leftContainer}>
@@ -67,7 +70,7 @@ function IndividualChat(route) {
             </View>
           </View>
           <TouchableOpacity style={styles.menuButton}>
-            <Text>Back</Text>
+            {/* <Text>Back</Text> */}
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -75,7 +78,7 @@ function IndividualChat(route) {
   };
 
   let ChatBody = () => {
-    let renderMessage = ({item}) => {
+    let renderMessage = ({item, index}) => {
       return (
         <ScrollView
           style={
@@ -83,7 +86,9 @@ function IndividualChat(route) {
               ? styles.messageSent
               : styles.messageReceived
           }>
-          <Text style={styles.messageText}>{item.message}</Text>
+          <Text style={styles.messageText} key={index}>
+            {item.message}
+          </Text>
           <Text style={styles.timestampText}>{item.timestamp}</Text>
         </ScrollView>
       );
@@ -96,7 +101,10 @@ function IndividualChat(route) {
         keyExtractor={item => item.actionId.toString()}
         contentContainerStyle={styles.contentContainer}
         legacyImplementation={true}
-        extraData={chats[chatIndex].messages}
+        extraData={true}
+        ref={flatList}
+  onContentSizeChange={()=> flatList.current.scrollToEnd()}
+      
       />
     );
   };
@@ -106,6 +114,9 @@ function IndividualChat(route) {
 
     let handleSendMessage = () => {
       console.log(message);
+      const sendObject = {'action':'agentReplyChat','eId':chats[chatIndex].eId,'message':message,'contentType':'TEXT','chatId':chats[chatIndex].chatId,'attachment':{},'pickup':false};
+      console.log('send Object',sendObject);
+      messageService.sendMessage(sendObject);
       setMessage('');
     };
 
@@ -145,14 +156,14 @@ function IndividualChat(route) {
       <ChatFooter />
     </>
   );
-}
+};
 
 let styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 56,
+    height: 50,
     backgroundColor: 'white',
     paddingHorizontal: 16,
     borderBottomColor: '#DDDDDD',
@@ -164,6 +175,7 @@ let styles = StyleSheet.create({
   leftContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex:1
   },
   logo: {
     width: 24,

@@ -105,9 +105,45 @@ export const ChatScreen = ({route}) => {
            setChats(oldChats);
           //  states.setUsers(oldChats);
           // userActionListener(oldChats);
-           console.log("from state -->",states.users);
+          //  console.log("from state -->",states.users);
           //  setNewMessages()
-           console.log("after appending messages",JSON.stringify(chats));
+          //  console.log("after appending messages",JSON.stringify(chats));
+          }});
+
+
+
+        
+
+       }
+       else if(obj.action==="agentReplyChat"){
+        // console.log("customerReplyChat-->",JSON.stringify(obj.content[0].response));
+        var eId=obj.content[0].eId;
+        var res=obj.content[0].response;
+        var chatId=res.chat.chatId;
+        var messages=res.chat.messages;
+        // console.log(`CustomerReplyChat--> ${chatId} `);
+        var oldChats=chats;
+        chats.map((response,index)=>{
+          // console.log(`CustomerReplyChat inMap--> ${response.chatId} == ${chatId}`);
+          if(response.chatId==chatId){
+            var newChat=response;
+            var oldMessages=response.messages;
+            var newMessages=messages;
+            // console.log("Set global data-->",JSON.stringify(newMessages[0].message))
+            setGlobalData(JSON.stringify(newMessages[0].message));
+            console.log("Global data--->",globalData);
+            newChat.messages=[...oldMessages,...newMessages];
+            oldChats[index]=newChat;
+            // console.log("appendMessage-->",JSON.stringify(response.chatId));
+            console.log("existing messages-->",JSON.stringify(newChat.messages));
+            console.log("new messages-->",JSON.stringify(newMessages));
+            console.log("finalarray",[...oldMessages,...messages] );
+           setChats(oldChats);
+          //  states.setUsers(oldChats);
+          // userActionListener(oldChats);
+          //  console.log("from state -->",states.users);
+          //  setNewMessages()
+          //  console.log("after appending messages",JSON.stringify(chats));
           }});
 
 
@@ -127,7 +163,7 @@ export const ChatScreen = ({route}) => {
   return()=>{
     console.log('This is unmounted.');
     if(socketListener){
-    socketListener.unsubscribe();
+    // socketListener.unsubscribe();
     }
   }
   },[])
@@ -150,24 +186,26 @@ export const ChatScreen = ({route}) => {
           flex: 1,
           backgroundColor: '#FFFFFF',
         }}>
-        <GlobalContext.Provider value={{chats, setChats,globalData}}>
+        <GlobalContext.Provider value={users}>
         {/* <ChatListPage value={{chats, setChats,globalData}} />  */}
         
         <NavigationContainer independent={true} >
         <Stack.Navigator >
           {/* <ChatListPage value={chats} />  */}
           <Stack.Screen
-              name="ChatListPage"
-              component={ChatListPage}
-              options={{headerShown: false}}
-              initialParams={{chats, setChats,globalData}}
-            />
+              name="ChatListPage" options={{headerShown:false}}
+            >
+              {(props) => <ChatListPage {...props} extraData={chats} initialParams={chats} />}
+            </Stack.Screen>
+            
           <Stack.Screen
-              name="IndividualChat"
-              component={IndividualChat}
-              options={{headerShown: false}}
-              initialParams={{chats, chatId,globalData}}
-            />
+              name="IndividualChat" options={{headerShown:false}}
+              >
+              {(props) => <IndividualChat {...props} extraData={chats} initialParams={chatId} />}
+              </Stack.Screen>
+              
+            
+            
            {/* <IndividualChat value={chats} /> */}
            </Stack.Navigator>
            </NavigationContainer>

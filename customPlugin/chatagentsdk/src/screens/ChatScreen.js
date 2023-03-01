@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, FlatList, Image, TouchableOpacity} from 'react-native';
 import {Tab, TabView} from '@rneui/themed';
-import {useNavigation,useRoute } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {ChatMessageScreen} from '../providers/individualChatProvider';
 import IndividualChat from './IndividualChat';
 
-import {userActionListener} from '../providers/listenerProvider'
+import {userActionListener} from '../providers/listenerProvider';
 import useStates from '../providers/stateProvider';
 
 let ActiveChats = chats => {
@@ -13,24 +13,33 @@ let ActiveChats = chats => {
   // setTimeout(() => {
   //   console.log('Active chat tab-->', JSON.stringify({chats:chats.value}));
   // }, 3000);
-
-  const [dataItem, setDataItem] = useState(chats.value);
+  const [chatUser, setChatUser] = useState([]);
+  const [chatUserMessages, setChatUserMEssages] = useState([]);
+  // const [dataItem, setDataItem] = useState(chats.value);
   useEffect(() => {
     // setDataItem(chats.value);
-  // navigation.setParams({'chats':chats.value});
-  }, [dataItem]);
+    // navigation.setParams({'chats':chats.value});
 
-  let renderItem = ({item}) => (
+    setChatUser(chats.value);
+    setChatUserMEssages(chats.value.messages)
+  }, [chatUser]);
+  useEffect(() => {
+    // setDataItem(chats.value);
+    // navigation.setParams({'chats':chats.value});
+      setChatUserMEssages(chatUser.messages)
+  }, [chatUserMessages]);
+
+  let renderItem = ({item, index}) => (
     <TouchableOpacity
       onPress={() => {
-         navigation.navigate('IndividualChat', {chatId:item.chatId});
+        navigation.navigate('IndividualChat', {chatId: item.chatId});
         // <ChatMessageScreen value={item} />
       }}>
       <View style={styles.item}>
         <Image source={{uri: item.customerIconUrl}} style={styles.avatar} />
         <View style={styles.details}>
           <Text style={styles.name}>{item.customerName}</Text>
-          <Text style={styles.lastMessage}>
+          <Text style={styles.lastMessage} key={index}>
             {item.messages[item.messages.length - 1].message}
           </Text>
         </View>
@@ -46,14 +55,13 @@ let ActiveChats = chats => {
     </TouchableOpacity>
   );
 
-  if (chats.value) {
+  if (chatUser.length > 0) {
     return (
       <FlatList
         legacyImplementation={true}
         data={chats.value}
-        keyExtractor={item => item.chatId.toString()}
         renderItem={renderItem}
-        extraData={chats.value}
+        extraData={chatUserMessages}
       />
     );
   } else {
@@ -93,9 +101,9 @@ let ClosedChats = () => {
 };
 
 let ChatHeader = globalData => {
-  let tempData = globalData.value.globalData;
+  // let tempData = globalData.value;
   const clickNotify = () => {};
-  console.log('ChatHeader', JSON.stringify(globalData));
+  // console.log('ChatHeader', JSON.stringify(globalData));
 
   return (
     <View style={styles.header}>
@@ -105,7 +113,7 @@ let ChatHeader = globalData => {
           style={styles.logo}
         />
         <View style={styles.status}>
-          <Text style={styles.logotext}>Chats {tempData}</Text>
+          <Text style={styles.logotext}>Chats </Text>
           <View
             style={[styles.statusIndicator, {backgroundColor: '#5ED430'}]}
           />
@@ -118,20 +126,34 @@ let ChatHeader = globalData => {
           style={styles.icon}
         />
         <TouchableOpacity onPress={clickNotify}>
+        <View style={styles.badgeSetup}>
           <Image
             source={require('../../assets/notification_64.png')}
             style={styles.icon}
           />
+          <Badge count={4} />
+          </View>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
+const Badge = ({count})=>(
+  <View style ={{
+    width:10,
+    height:10,
+    borderRadius:6,   //half radius will make it cirlce,
+    backgroundColor:'red'
+   }}>
+    <Text style={{color:'#FFF'}}>{count}</Text>
+  </View>
+); 
+
 let Tabs = chats => {
   const [index, setIndex] = React.useState(0);
   setTimeout(() => {
-    console.log('chats in tab ', chats.value.chats);
+    console.log('chats in tab ', chats.value);
   }, 2000);
 
   return (
@@ -158,7 +180,7 @@ let Tabs = chats => {
 
       <TabView value={index} onChange={setIndex} animationType="spring">
         <TabView.Item style={{backgroundColor: 'white', width: '100%'}}>
-          <ActiveChats value={chats.value.chats} />
+          <ActiveChats value={chats.value} />
         </TabView.Item>
         <TabView.Item style={{backgroundColor: 'white', width: '100%'}}>
           <ClosedChats />
@@ -168,11 +190,11 @@ let Tabs = chats => {
   );
 };
 
-let ChatListPage = (chats, setChats, globalData) => {
-  console.log('ChatScreen', chats.route.params.chats);
-  console.log('ChatScreen-->globaldata', chats.route.params.globalData);
+let ChatListPage = chats => {
+  console.log('ChatScreen', JSON.stringify(chats.extraData));
+  console.log('ChatScreen-->globaldata', chats.extraData);
   console.log('ChatList page-->');
-  
+
   const [mounted, setMounted] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -183,8 +205,8 @@ let ChatListPage = (chats, setChats, globalData) => {
   if (isLoaded) {
     return (
       <>
-        <ChatHeader value={chats.route.params} />
-        <Tabs value={chats.route.params} />
+        <ChatHeader value={chats.extraData} />
+        <Tabs value={chats.extraData} />
       </>
     );
   } else {
@@ -254,6 +276,10 @@ let styles = {
     alignItems: 'center',
   },
   right: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  badgeSetup: {
     flexDirection: 'row',
     alignItems: 'center',
   },
