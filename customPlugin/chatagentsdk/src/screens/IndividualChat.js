@@ -15,25 +15,22 @@ import Variables from '../utils/variables';
 import {messageService} from '../services/websocket';
 let IndividualChat = route => {
   let flatList = React.useRef(null);
-  //  const {chats, setChats} = useContext(GlobalContext);
 
   console.log('Chat using context', JSON.stringify(route));
   let oriRoute = route.route;
   console.log('In individual chatparams-->', oriRoute.params.chatId);
-  const [chats, setMyChats] = React.useState(route.extraData);
-  // let chats = route.value;
+  
   let chatId = oriRoute.params.chatId;
-  let chatIndex = route.extraData.map((response, index) => {
-    if (response.chatId == oriRoute.params.chatId) return index;
+  let chatIndex = route.extraData.find((response) => {
+    return response.chatId == oriRoute.params.chatId
   });
+  const [chats, setMyChats] = React.useState(chatIndex);
   console.log('Item variable index', chatIndex);
-  // let messagehistory = chats[index].messages.map(res => res);
 
-  // console.log('messagehistory', messagehistory);
 
   React.useEffect(() => {
-    ChatBody();
-  }, [chats]);
+  
+  },);
 
   let ChatHeader = () => {
     const navigation = useNavigation();
@@ -55,15 +52,15 @@ let IndividualChat = route => {
           </TouchableOpacity>
           <View style={styles.leftContainer}>
             <Image
-              source={{uri: chats[chatIndex].customerIconUrl}}
+              source={{uri: chats.customerIconUrl}}
               style={styles.avatar}
             />
             <View style={styles.textContainer}>
-              <Text style={styles.title}>{chats[chatIndex].customerName}</Text>
+              <Text style={styles.title}>{chats.customerName}</Text>
               <Text style={styles.subtitle}>
                 {
-                  chats[chatIndex].messages[
-                    chats[chatIndex].messages.length - 1
+                  chats.messages[
+                    chats.messages.length - 1
                   ].message
                 }
               </Text>
@@ -93,20 +90,24 @@ let IndividualChat = route => {
         </ScrollView>
       );
     };
-
+    if (chats.messages) {
     return (
+      
       <FlatList
-        data={chats[chatIndex].messages}
+        data={chats.messages}
         renderItem={renderMessage}
         keyExtractor={item => item.actionId.toString()}
         contentContainerStyle={styles.contentContainer}
         legacyImplementation={true}
         extraData={true}
         ref={flatList}
-  onContentSizeChange={()=> flatList.current.scrollToEnd()}
+//  onContentSizeChange={()=> flatList.current.scrollToEnd()}
       
       />
     );
+  } else {
+    return <Text> Loading.....</Text>;
+  }
   };
 
   let ChatFooter = () => {
@@ -114,7 +115,7 @@ let IndividualChat = route => {
 
     let handleSendMessage = () => {
       console.log(message);
-      const sendObject = {'action':'agentReplyChat','eId':chats[chatIndex].eId,'message':message,'contentType':'TEXT','chatId':chats[chatIndex].chatId,'attachment':{},'pickup':false};
+      const sendObject = {'action':'agentReplyChat','eId':chats.eId,'message':message,'contentType':'TEXT','chatId':chats.chatId,'attachment':{},'pickup':false};
       console.log('send Object',sendObject);
       messageService.sendMessage(sendObject);
       setMessage('');

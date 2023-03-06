@@ -1,26 +1,20 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 
-import ChatListPage from '../screens/ChatScreen';
-import {messageService} from '../services/websocket';
-import Variables from '../utils/variables';
-import {activeChats} from '../services/api';
-import websocket from '../../src/services/websocket';
-import subUser from '../../src/services/websocket'
+
 import IndividualChat from '../screens/IndividualChat';
-import {SafeAreaView, ActivityIndicator, Text, View} from 'react-native';
+import {SafeAreaView, Text } from 'react-native';
 import {useRoute} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-// import GlobalContext from '../utils/globalupdate'
+
 import MyContext from '../components/globalcontext';
-//   const GlobaltempContext = useContext(GlobalContext);
-import {GlobalContext} from '../utils/globalupdate';
+
+
 const Stack = createStackNavigator();
-// const GlobaltempContext = useContext(GlobalContext);
+
 export const ChatMessageScreen = (route) => {
  
-  const [globalData, setGlobalData] = useState("Hi testing");
-  const [agents, setAgents] = useState([]);
-  //  const {chats, setChats} = useContext(MyContext);
+
+ 
 
   const route1=useRoute();
   console.log("Route1",JSON.stringify(route1));

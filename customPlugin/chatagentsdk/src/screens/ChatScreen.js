@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, FlatList, Image, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import {Tab, TabView} from '@rneui/themed';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {ChatMessageScreen} from '../providers/individualChatProvider';
@@ -7,6 +14,7 @@ import IndividualChat from './IndividualChat';
 
 import {userActionListener} from '../providers/listenerProvider';
 import useStates from '../providers/stateProvider';
+import {messageService} from '../services/websocket';
 
 let ActiveChats = chats => {
   const navigation = useNavigation();
@@ -16,53 +24,85 @@ let ActiveChats = chats => {
   const [chatUser, setChatUser] = useState([]);
   const [chatUserMessages, setChatUserMEssages] = useState([]);
   // const [dataItem, setDataItem] = useState(chats.value);
-  useEffect(() => {
+  React.useEffect(() => {
     // setDataItem(chats.value);
     // navigation.setParams({'chats':chats.value});
-
+    // console.log("before--Values--> ",JSON.stringify(chats.value))
     setChatUser(chats.value);
-    setChatUserMEssages(chats.value.messages)
-  }, [chatUser]);
+    // console.log("after--Values--> ",JSON.stringify(chats.value))
+    setChatUserMEssages(chats.value.messages);
+  });
   useEffect(() => {
     // setDataItem(chats.value);
     // navigation.setParams({'chats':chats.value});
-      setChatUserMEssages(chatUser.messages)
+    setChatUserMEssages(chatUser.messages);
   }, [chatUserMessages]);
 
-  let renderItem = ({item, index}) => (
-    <TouchableOpacity
-      onPress={() => {
-        navigation.navigate('IndividualChat', {chatId: item.chatId});
-        // <ChatMessageScreen value={item} />
-      }}>
-      <View style={styles.item}>
-        <Image source={{uri: item.customerIconUrl}} style={styles.avatar} />
-        <View style={styles.details}>
-          <Text style={styles.name}>{item.customerName}</Text>
-          <Text style={styles.lastMessage} key={index}>
-            {item.messages[item.messages.length - 1].message}
-          </Text>
-        </View>
-        <View style={styles.info}>
-          <Text style={styles.time}>{item.time}</Text>
-          {item.unreadCount > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadCount}>{item.unreadCount}</Text>
-            </View>
-          )}
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  // let renderItem = ({item, index}) => (
+  //   <TouchableOpacity
+  //     onPress={() => {
+  //       navigation.navigate('IndividualChat', {chatId: item.chatId});
+  //       // <ChatMessageScreen value={item} />
+  //     }}>
+  //     <View style={styles.item}>
+  //       <Image source={{uri: item.customerIconUrl}} style={styles.avatar} />
+  //       <View style={styles.details}>
+  //         <Text style={styles.name}>{item.customerName}</Text>
+  //         <Text style={styles.lastMessage} key={index}>
+  //           {item.messages[item.messages.length - 1].message}
+  //         </Text>
+  //       </View>
+  //       <View style={styles.info}>
+  //         <Text style={styles.time}>{item.time}</Text>
+  //         {item.unreadCount > 0 && (
+  //           <View style={styles.unreadBadge}>
+  //             <Text style={styles.unreadCount}>{item.unreadCount}</Text>
+  //           </View>
+  //         )}
+  //       </View>
+  //     </View>
+  //   </TouchableOpacity>
+  // );
 
   if (chatUser.length > 0) {
     return (
-      <FlatList
-        legacyImplementation={true}
-        data={chats.value}
-        renderItem={renderItem}
-        extraData={chatUserMessages}
-      />
+      <ScrollView style={styles.container}>
+        {chatUser.map((chat, index) => (
+          <TouchableOpacity
+            key={chat.chatId}
+            onPress={() =>
+              // handleChatPress(chat, index)
+              navigation.navigate('IndividualChat', {chatId: chat.chatId})
+            }>
+            <View style={styles.item}>
+              <Image
+                source={{uri: chat.customerIconUrl}}
+                style={styles.avatar}
+              />
+              <View style={styles.details}>
+                <Text style={styles.name}>{chat.customerName}</Text>
+                <Text style={styles.lastMessage}>
+                  {chat.messages[chat.messages.length - 1].message}
+                </Text>
+              </View>
+              <View style={styles.info}>
+                <Text style={styles.time}>{chat.time}</Text>
+                {chat.unreadCount > 0 && (
+                  <View style={styles.unreadBadge}>
+                    <Text style={styles.unreadCount}>{chat.unreadCount}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      // <FlatList
+      //   legacyImplementation={true}
+      //   data={chats.value}
+      //   renderItem={renderItem}
+      //   extraData={chatUserMessages}
+      // />
     );
   } else {
     return <Text> Loading.....</Text>;
@@ -100,10 +140,15 @@ let ClosedChats = () => {
   );
 };
 
-let ChatHeader = globalData => {
+let ChatHeader = props => {
   // let tempData = globalData.value;
-  const clickNotify = () => {};
-  // console.log('ChatHeader', JSON.stringify(globalData));
+  const clickNotify = () => {
+    // agentPickupChat
+    const sendObject = {'action':'agentPickupChat',chatId:''};
+      console.log('send Object',sendObject);
+      messageService.sendMessage(sendObject);
+  };
+  console.log('ChatHeader', JSON.stringify(props));
 
   return (
     <View style={styles.header}>
@@ -126,12 +171,36 @@ let ChatHeader = globalData => {
           style={styles.icon}
         />
         <TouchableOpacity onPress={clickNotify}>
-        <View style={styles.badgeSetup}>
-          <Image
-            source={require('../../assets/notification_64.png')}
-            style={styles.icon}
-          />
-          <Badge count={4} />
+          <View style={styles.badgeSetup}>
+            <Image
+              source={require('../../assets/notification_64.png')}
+              style={styles.icon}
+            />
+            {props.value.newChatCount>0 ?
+            <View
+              style={{
+                position: 'absolute',
+                backgroundColor: 'red',
+                width: 16,
+                height: 16,
+                borderRadius: 15 / 2,
+                right: 10,
+                top: +5,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <Text
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#FFFFFF',
+                  fontSize: 8,
+                }}>
+                {props.value.newChatCount}
+              </Text>
+            </View> :
+            <View />}
+            {/* <Badge count={props.value.newChatCount} /> */}
           </View>
         </TouchableOpacity>
       </View>
@@ -139,16 +208,17 @@ let ChatHeader = globalData => {
   );
 };
 
-const Badge = ({count})=>(
-  <View style ={{
-    width:10,
-    height:10,
-    borderRadius:6,   //half radius will make it cirlce,
-    backgroundColor:'red'
-   }}>
-    <Text style={{color:'#FFF'}}>{count}</Text>
+const Badge = ({count}) => (
+  <View
+    style={{
+      width: 15,
+      height: 15,
+      borderRadius: 6, //half radius will make it cirlce,
+      backgroundColor: 'red',
+    }}>
+    <Text style={{color: '#FFF', fontSize: 10}}>{count}</Text>
   </View>
-); 
+);
 
 let Tabs = chats => {
   const [index, setIndex] = React.useState(0);
@@ -191,9 +261,9 @@ let Tabs = chats => {
 };
 
 let ChatListPage = chats => {
-  console.log('ChatScreen', JSON.stringify(chats.extraData));
-  console.log('ChatScreen-->globaldata', chats.extraData);
-  console.log('ChatList page-->');
+  console.log('ChatScreen', JSON.stringify(chats));
+  // console.log('ChatScreen-->globaldata', chats.extraData);
+  // console.log('ChatList page-->');
 
   const [mounted, setMounted] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -205,7 +275,7 @@ let ChatListPage = chats => {
   if (isLoaded) {
     return (
       <>
-        <ChatHeader value={chats.extraData} />
+        <ChatHeader value={chats.initialParams} />
         <Tabs value={chats.extraData} />
       </>
     );
@@ -280,8 +350,11 @@ let styles = {
     alignItems: 'center',
   },
   badgeSetup: {
-    flexDirection: 'row',
+    // flexDirection: 'row',
+    // alignItems: 'center',
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   icon: {
     width: 24,
