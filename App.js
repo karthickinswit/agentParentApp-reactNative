@@ -17,23 +17,28 @@ import {
   StyleSheet,
   Button,
   Alert,
+  ActivityIndicator,
+  Animated
 } from 'react-native';
 import Variables from 'chatagentsdk/src/utils/variables';
 
 import {ChatScreen} from 'chatagentsdk/src/utils/globalupdate';
-import {ChatMessageScreen} from 'chatagentsdk/src/providers/individualChatProvider';
-import ChatListPage from 'chatagentsdk/src/screens/ChatScreen';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {FAB} from 'react-native-elements';
 import { LogBox } from 'react-native';
+import Conversation from 'chatagentsdk/src/screens/Conversation';
 
+export const ThemeContext = React.createContext({});
 export default function ChatParent() {
   const Stack = createStackNavigator();
-  LogBox.ignoreAllLogs();
+  //NativeModules.ExceptionsManager = null;
+  //console.error = {};
+   
+   LogBox.ignoreAllLogs();
   return (
     // <ChatApp />
-
+    
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown: false}} />
@@ -43,10 +48,11 @@ export default function ChatParent() {
           component={ChatScreen}
           options={{headerShown: false}}
         />
-        {/* <Stack.Screen name="ChatMessageScreen" component={ChatMessageScreen} options={{headerShown: false}}/> */}
+        {/* <Stack.Screen name="Conversation" component={Conversation} options={{headerShown: false}} /> */}
         
       </Stack.Navigator>
     </NavigationContainer>
+    
   );
 }
  LoginScreen = () => {
@@ -77,6 +83,7 @@ export default function ChatParent() {
     } else {
       let res = await LoginApi();
       console.log('res', res);
+      Alert.alert(JSON.stringify(res));
       if (res.status) {
         Alert.alert('Attempt Successful');
         console.log(res.response.token);
@@ -153,6 +160,73 @@ export default function ChatParent() {
 };
 const BlankPage = ({route}) => {
   const navigation = useNavigation();
+  let chat={};
+
+    chat['messages']=[
+        {
+            "id": "0",
+            "sender": "me",
+            "text": " yErLtR",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "1",
+            "sender": "me",
+            "text": " tnQCG6",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "2",
+            "sender": "me",
+            "text": " 2s0roJ",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "3",
+            "sender": "me",
+            "text": " 8t45cX",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "4",
+            "sender": "me",
+            "text": " YfOW49",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "5",
+            "sender": "me",
+            "text": " Svaypi",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "6",
+            "sender": "me",
+            "text": " IDetTs",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "7",
+            "sender": "me",
+            "text": " 6JOXfg",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "8",
+            "sender": "me",
+            "text": " o7qY03",
+            "timestamp": "9:00 AM"
+        },
+        {
+            "id": "9",
+            "sender": "me",
+            "text": " zCA9oJ",
+            "timestamp": "9:00 AM"
+        }
+    ];
+
+  const [chatData, setChatData] = useState(chat);
+  const [message, setMessage] = React.useState('');
 
   const propDetails = {
     name: route.params.username,
@@ -161,24 +235,90 @@ const BlankPage = ({route}) => {
     baseUrl: 'https://qa.twixor.digital/moc',
   };
 
+  let handleSendMessage = () => {
+    const newMessage = {
+      id: chatData.messages.length + 1,
+      sender: 'me',
+      text: message,
+      timestamp: '9:00 AM',
+    };
+    const updatedChatData = {
+      ...chatData,
+      messages: [...chatData.messages, newMessage],
+    };
+    //const that = this;
+    
+      setChatData(updatedChatData);
+      console.log("Timesup");
 
+    console.log(chatData);
+    setMessage('');
+  };
 
   const HandleClick = async () => {
     Variables.API_URL = propDetails.baseUrl;
     Variables.TOKEN = propDetails.token;
     console.log('Button Clicked');
+    var context=ThemeContext;
+    
+    //  navigation.navigate('Conversation',{context});
 
     navigation.navigate('ChatScreen', {
       userDetails: propDetails,
     });
-    // <ChatListPage test={'data received from parent'} />;
+    // // <ChatListPage test={'data received from parent'} />;
+  };
+  const renderMessage = ({item}) => {
+    return (
+      <Animated.ScrollView style={{marginTop: 0}}
+        >
+        <View style={
+          item.sender === 'me' ? styles.messageSent : styles.messageReceived
+        }>
+            
+          
+        <Text style={styles.messageText}>{item.text}</Text>
+        <Text style={styles.timestampText}>{item.timestamp}</Text>
+        </View>
+      </Animated.ScrollView>
+    );
   };
 
   return (
     <>
       <View style={styles.container}>
         <Text style={{marginBottom: 20}}> Hello {route.params.username} </Text>
+        <ActivityIndicator size="large" color="#217eac" />
         {/* <Button title="Click Here" onPress={handleclick}></Button> */}
+        <View style={{height: 300}}>
+  
+  <Animated.FlatList
+    data={chatData.messages}                 
+    renderItem={renderMessage}
+    keyExtractor={item => item.id.toString()}
+    contentContainerStyle={styles.contentContainer}
+    // refreshControl={
+    //   <RefreshControl refreshing={refreshing} onRefresh={refreshPage} />
+    // }
+  />
+  </View>
+  <View>
+  <TextInput
+                style={styles.input}
+                value={message}
+                onChangeText={setMessage}
+                placeholder="Type a message"
+                multiline
+              />
+              <TouchableOpacity
+                style={styles.sendButton}
+                onPress={handleSendMessage}>
+                <Image
+                  source={require('./assets/send_128.png')}
+                  style={styles.sendIcon}
+                />
+              </TouchableOpacity>
+  </View>
         <FAB
           title="start Messaging"
           style={styles.floatinBtn}
@@ -240,5 +380,34 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 10,
     right: 10,
+  },
+  messageSent: {
+    backgroundColor: '#ecf6fd',
+    alignSelf: 'flex-end',
+    maxWidth: '80%',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 8,
+  },
+  messageReceived: {
+    backgroundColor: '#FFFFFF',
+    alignSelf: 'flex-start',
+    maxWidth: '80%',
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 8,
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  timestampText: {
+    fontSize: 12,
+    color: 'gray',
+    marginTop: 4,
+    alignSelf: 'flex-end',
+  },
+  contentContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
 });

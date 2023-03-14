@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState} from '../../../../node_modules/react';
 import {
   View,
   Text,
@@ -11,32 +11,42 @@ import {Tab, TabView} from '@rneui/themed';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {ChatMessageScreen} from '../providers/individualChatProvider';
 import IndividualChat from './IndividualChat';
+import Conversation from './Conversation';
 
 import {userActionListener} from '../providers/listenerProvider';
 import useStates from '../providers/stateProvider';
 import {messageService} from '../services/websocket';
 
-let ActiveChats = chats => {
+import { timeConversion } from '../utils/utilities';
+import {
+  Menu,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+ } from 'react-native-popup-menu';
+
+let ActiveChats = props => {
   const navigation = useNavigation();
   // setTimeout(() => {
-  //   console.log('Active chat tab-->', JSON.stringify({chats:chats.value}));
+    // console.log('Active chat tab-->', JSON.stringify(props.value));
+     let chats=props.value.chats;
   // }, 3000);
-  const [chatUser, setChatUser] = useState([]);
-  const [chatUserMessages, setChatUserMEssages] = useState([]);
+  const [chatList, setChatList] = useState([]);
+ // const [chatUserMessages, setChatUserMEssages] = useState([]);
   // const [dataItem, setDataItem] = useState(chats.value);
   React.useEffect(() => {
     // setDataItem(chats.value);
     // navigation.setParams({'chats':chats.value});
     // console.log("before--Values--> ",JSON.stringify(chats.value))
-    setChatUser(chats.value);
+    setChatList(chats);
     // console.log("after--Values--> ",JSON.stringify(chats.value))
-    setChatUserMEssages(chats.value.messages);
+  //  setChatUserMEssages(chats.messages);
   });
-  useEffect(() => {
-    // setDataItem(chats.value);
-    // navigation.setParams({'chats':chats.value});
-    setChatUserMEssages(chatUser.messages);
-  }, [chatUserMessages]);
+  // useEffect(() => {
+  //   // setDataItem(chats.value);
+  //   // navigation.setParams({'chats':chats.value});
+  //  // setChatUserMEssages(chatUser.messages);
+  // }, []);
 
   // let renderItem = ({item, index}) => (
   //   <TouchableOpacity
@@ -64,15 +74,20 @@ let ActiveChats = chats => {
   //   </TouchableOpacity>
   // );
 
-  if (chatUser.length > 0) {
+
+  if (chatList.length > 0) {
     return (
       <ScrollView style={styles.container}>
-        {chatUser.map((chat, index) => (
+        {chatList.map((chat, index) => (
           <TouchableOpacity
             key={chat.chatId}
-            onPress={() =>
+            onPress={() =>{
               // handleChatPress(chat, index)
-              navigation.navigate('IndividualChat', {chatId: chat.chatId})
+              props.value.setChatUser(chat);
+                navigation.replace('IndividualChat',{chat})
+              
+              //  navigation.replace('Conversation',{chat})
+            }
             }>
             <View style={styles.item}>
               <Image
@@ -86,7 +101,7 @@ let ActiveChats = chats => {
                 </Text>
               </View>
               <View style={styles.info}>
-                <Text style={styles.time}>{chat.time}</Text>
+                <Text style={styles.time}>{timeConversion(chat.lastModifiedOn['$date'])}</Text>
                 {chat.unreadCount > 0 && (
                   <View style={styles.unreadBadge}>
                     <Text style={styles.unreadCount}>{chat.unreadCount}</Text>
@@ -148,7 +163,7 @@ let ChatHeader = props => {
       console.log('send Object',sendObject);
       messageService.sendMessage(sendObject);
   };
-  console.log('ChatHeader', JSON.stringify(props));
+  // console.log('ChatHeader', JSON.stringify(props));
 
   return (
     <View style={styles.header}>
@@ -203,28 +218,40 @@ let ChatHeader = props => {
             {/* <Badge count={props.value.newChatCount} /> */}
           </View>
         </TouchableOpacity>
+        
+        <View style={{marginLeft:10,bottom:10}}>
+        <Menu style={{position:'absolute',top:0,right:0}}>
+     <MenuTrigger  >
+           <Image
+             source={require('../../assets/inside_menu_64.png')}
+             style={{ height: 30, width:8 }}
+
+           />
+           </MenuTrigger>
+     <MenuOptions optionsContainerStyle=
+   {{paddingLeft:4,height:10,width:20}}>
+
+       <MenuOption onSelect={() => alert('No New chats')} text="New Chats - {0}" /><MenuOption onSelect={() => alert('No Transferred Chats')} disabled={true}>
+       <Text style={{ color: 'red' }}>Transferred Chat</Text>
+     </MenuOption>
+     <MenuOption onSelect={() => alert('Invited Chat')} disabled={true} text="Invited Chat" />
+     </MenuOptions>
+     </Menu>
+
+        
+        </View>
+        
       </View>
     </View>
   );
 };
 
-const Badge = ({count}) => (
-  <View
-    style={{
-      width: 15,
-      height: 15,
-      borderRadius: 6, //half radius will make it cirlce,
-      backgroundColor: 'red',
-    }}>
-    <Text style={{color: '#FFF', fontSize: 10}}>{count}</Text>
-  </View>
-);
 
-let Tabs = chats => {
+let Tabs = props => {
   const [index, setIndex] = React.useState(0);
-  setTimeout(() => {
-    console.log('chats in tab ', chats.value);
-  }, 2000);
+let chats=props.value;
+    //console.log('chats in tab ',JSON.stringify (props));
+
 
   return (
     <>
@@ -250,7 +277,7 @@ let Tabs = chats => {
 
       <TabView value={index} onChange={setIndex} animationType="spring">
         <TabView.Item style={{backgroundColor: 'white', width: '100%'}}>
-          <ActiveChats value={chats.value} />
+          <ActiveChats value={chats} />
         </TabView.Item>
         <TabView.Item style={{backgroundColor: 'white', width: '100%'}}>
           <ClosedChats />
@@ -261,7 +288,7 @@ let Tabs = chats => {
 };
 
 let ChatListPage = chats => {
-  console.log('ChatScreen', JSON.stringify(chats));
+  // console.log('ChatScreen', JSON.stringify(chats));
   // console.log('ChatScreen-->globaldata', chats.extraData);
   // console.log('ChatList page-->');
 
@@ -274,10 +301,10 @@ let ChatListPage = chats => {
 
   if (isLoaded) {
     return (
-      <>
-        <ChatHeader value={chats.initialParams} />
-        <Tabs value={chats.extraData} />
-      </>
+      
+        <><ChatHeader value={chats.initialParams} /><Tabs value={chats.initialParams} /></>
+        
+      
     );
   } else {
     return (

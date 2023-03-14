@@ -4,7 +4,7 @@ import useGlobalData from '../utils/globalupdate';
 // import userInfo from './constants/constants';
 import Variables from '../utils/variables';
 
-let subUser = new Subject();
+export let subUser = new Subject();
 
 export let messageService = {
   sendMessage: message => {
